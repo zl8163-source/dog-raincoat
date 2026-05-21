@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>雨季定制 · 为你的毛孩子</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap');
+
+  :root {
+    --rain: #4A7FA5;
+    --rain-light: #D6E8F5;
+    --rain-dark: #1e3d54;
+    --moss: #7BA05B;
+    --cream: #FAF8F4;
+    --ink: #1a1a1a;
+    --mist: #8fa8bb;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: var(--cream);
+    font-family: 'Noto Serif SC', 'PingFang SC', serif;
+    overflow-x: hidden;
+  }
+
+  .rain-bg {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .raindrop {
+    position: absolute; width: 1.5px;
+    background: linear-gradient(to bottom, transparent, var(--rain-light));
+    animation: fall linear infinite; opacity: 0.4; border-radius: 2px;
+  }
+  @keyframes fall {
+    0% { transform: translateY(-100px); opacity: 0; }
+    10% { opacity: 0.4; } 90% { opacity: 0.4; }
+    100% { transform: translateY(110vh); opacity: 0; }
+  }
+
+  .page {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 48px 24px;
+  }
+
+  .header { text-align: center; margin-bottom: 52px; animation: slideDown 0.8s ease both; }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .logo-mark {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--rain-dark); color: var(--cream);
+    padding: 8px 20px; border-radius: 40px;
+    font-size: 13px; letter-spacing: 3px; margin-bottom: 28px;
+  }
+  .logo-mark::before { content: '☔'; font-size: 16px; }
+
+  .headline {
+    font-size: clamp(22px, 5vw, 30px);
+    color: var(--rain-dark); line-height: 1.6; font-weight: 700;
+    max-width: 420px; margin: 0 auto 12px;
+  }
+  .headline em { color: var(--rain); font-style: normal; }
+  .subline { font-size: 14px; color: var(--mist); letter-spacing: 1px; }
+
+  .upload-card {
+    background: #fff; border-radius: 24px; padding: 40px 32px;
+    width: 100%; max-width: 480px;
+    box-shadow: 0 8px 40px rgba(74,127,165,0.12), 0 2px 8px rgba(0,0,0,0.04);
+    animation: fadeUp 0.9s 0.2s ease both;
+    border: 1.5px solid rgba(74,127,165,0.1);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .upload-zone {
+    border: 2px dashed var(--rain-light); border-radius: 16px;
+    padding: 48px 24px; text-align: center; cursor: pointer;
+    transition: all 0.3s ease; background: var(--cream);
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--rain); background: rgba(74,127,165,0.04);
+  }
+  .upload-zone input { display: none; }
+  .upload-icon {
+    font-size: 48px; display: block; margin-bottom: 16px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .upload-text  { font-size: 15px; color: var(--rain-dark); font-weight: 700; margin-bottom: 6px; }
+  .upload-hint  { font-size: 12px; color: var(--mist); }
+
+  .preview-wrap { display: none; position: relative; border-radius: 16px; overflow: hidden; }
+  .preview-wrap img { width: 100%; max-height: 280px; object-fit: cover; display: block; }
+  .preview-change {
+    position: absolute; bottom: 12px; right: 12px;
+    background: rgba(0,0,0,0.55); color: #fff;
+    border: none; padding: 8px 16px; border-radius: 20px;
+    font-size: 12px; cursor: pointer; font-family: inherit;
+    backdrop-filter: blur(4px);
+  }
+
+  .btn-analyze {
+    width: 100%; margin-top: 24px;
+    background: linear-gradient(135deg, var(--rain-dark) 0%, var(--rain) 100%);
+    color: #fff; border: none; padding: 18px 0; border-radius: 50px;
+    font-size: 16px; font-family: inherit; font-weight: 700; letter-spacing: 1px;
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 6px 24px rgba(74,127,165,0.35);
+  }
+  .btn-analyze:hover   { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(74,127,165,0.45); }
+  .btn-analyze:active  { transform: translateY(0); }
+  .btn-analyze:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .result-panel { display: none; width: 100%; max-width: 480px; margin-top: 24px; animation: fadeUp 0.6s ease both; }
+
+  .chat-wrap {
+    background: #fff; border-radius: 20px; padding: 28px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06); margin-bottom: 20px;
+    border: 1.5px solid rgba(74,127,165,0.08);
+  }
+  .chat-avatar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .avatar-circle {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--rain-dark), var(--rain));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .avatar-name { font-size: 13px; color: var(--mist); }
+  .avatar-name strong { display: block; color: var(--rain-dark); font-size: 15px; }
+
+  .dog-info-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .tag { background: var(--rain-light); color: var(--rain-dark); padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+  .tag.moss { background: #e8f2e0; color: #4a6e32; }
+
+  .chat-bubble {
+    background: var(--cream); border-radius: 4px 16px 16px 16px;
+    padding: 20px; font-size: 15px; color: var(--ink); line-height: 1.8;
+    border-left: 3px solid var(--rain);
+  }
+  .typing-cursor {
+    display: inline-block; width: 2px; height: 16px;
+    background: var(--rain); margin-left: 2px; vertical-align: middle;
+    animation: blink 0.8s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .spec-card {
+    background: #fff; border-radius: 20px; padding: 28px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06); margin-bottom: 20px;
+    border: 1.5px solid rgba(74,127,165,0.08);
+  }
+  .spec-title {
+    font-size: 13px; color: var(--mist); letter-spacing: 2px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .spec-title::before { content:''; display:block; width:20px; height:2px; background:var(--rain); }
+  .spec-list { list-style: none; }
+  .spec-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px;
+  }
+  .spec-item:last-child { border-bottom: none; }
+  .spec-label { color: var(--mist); }
+  .spec-change { display: flex; align-items: center; gap: 8px; }
+  .spec-base   { color: #bbb; text-decoration: line-through; font-size: 12px; }
+  .spec-new    { color: var(--rain-dark); font-weight: 700; font-size: 15px; }
+  .spec-diff   { background: #e8f2e0; color: #4a6e32; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+
+  .gen-image-wrap {
+    background: #fff; border-radius: 20px; overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06); margin-bottom: 20px;
+    border: 1.5px solid rgba(74,127,165,0.08);
+  }
+  .gen-image-header {
+    padding: 20px 28px 16px; font-size: 13px; color: var(--mist);
+    letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid #f5f5f5;
+  }
+  .gen-image-header::before { content:''; display:block; width:20px; height:2px; background:var(--moss); }
+  .gen-image-body { padding: 20px; text-align: center; }
+  .gen-image-body img { width: 100%; border-radius: 12px; display: block; }
+
+  .gen-loading { padding: 60px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .spinner {
+    width: 48px; height: 48px; border: 3px solid var(--rain-light);
+    border-top-color: var(--rain); border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .gen-loading p { font-size: 13px; color: var(--mist); }
+
+  .action-row { display: flex; gap: 12px; margin-top: 4px; }
+  .btn-confirm {
+    flex: 1; padding: 16px 0; border-radius: 50px; border: none;
+    font-size: 15px; font-family: inherit; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-confirm.primary {
+    background: linear-gradient(135deg, var(--rain-dark), var(--rain));
+    color: #fff; box-shadow: 0 6px 20px rgba(74,127,165,0.3);
+  }
+  .btn-confirm.secondary { background: #f5f5f5; color: var(--ink); }
+  .btn-confirm:hover { transform: translateY(-1px); }
+
+  .footer { margin-top: 48px; text-align: center; font-size: 12px; color: #ccc; letter-spacing: 1px; animation: fadeUp 1s 0.4s ease both; }
+
+  .loading-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(250,248,244,0.92); backdrop-filter: blur(8px);
+    z-index: 100; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+  }
+  .loading-overlay.show { display: flex; }
+  .loading-overlay .spinner { width: 56px; height: 56px; border-width: 4px; }
+  .loading-steps { text-align: center; }
+  .loading-steps p     { font-size: 16px; color: var(--rain-dark); font-weight: 700; margin-bottom: 8px; }
+  .loading-steps small { font-size: 13px; color: var(--mist); }
+  .step-dots { display: flex; gap: 6px; justify-content: center; margin-top: 12px; }
+  .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rain-light); transition: background 0.3s; }
+  .step-dot.active { background: var(--rain); }
+
+  @media (max-width: 400px) {
+    .upload-card, .result-panel { padding: 28px 16px; }
+    .chat-wrap, .spec-card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="rain-bg" id="rainBg"></div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-steps">
+    <p id="loadingText">AI 正在观察你的毛孩子…</p>
+    <small id="loadingSubtext">识别品种、体型与毛色</small>
+    <div class="step-dots">
+      <div class="step-dot active" id="dot0"></div>
+      <div class="step-dot" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="header">
+    <div class="logo-mark">雨季定制工坊</div>
+    <h1 class="headline">
+      上传一张你家<em>法斗 / 柯基</em>的全身侧面照<br>
+      AI 为它定制本周雨季冲锋衣
+    </h1>
+    <p class="subline">视觉识别 · 体型分析 · 专属版型 · 效果预览</p>
+  </div>
+
+  <div class="upload-card">
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept="image/*">
+      <span class="upload-icon">🐾</span>
+      <p class="upload-text">点击或拖拽上传照片</p>
+      <p class="upload-hint">支持 JPG / PNG · 建议侧身全身照效果更好</p>
+    </div>
+    <div class="preview-wrap" id="previewWrap">
+      <img id="previewImg" src="" alt="预览">
+      <button class="preview-change" onclick="resetUpload()">换一张</button>
+    </div>
+    <button class="btn-analyze" id="analyzeBtn" onclick="analyze()" disabled>
+      ✦ 开始 AI 分析定制
+    </button>
+  </div>
+
+  <div class="result-panel" id="resultPanel">
+    <div class="chat-wrap">
+      <div class="chat-avatar">
+        <div class="avatar-circle">🤖</div>
+        <div class="avatar-name">
+          <strong>定制设计师 · 小雨</strong>
+          基于照片的体型分析
+        </div>
+      </div>
+      <div class="dog-info-tags" id="dogTags"></div>
+      <div class="chat-bubble">
+        <span id="chatText"></span><span class="typing-cursor" id="cursor"></span>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-title">定制尺码调整方案</div>
+      <ul class="spec-list" id="specList"></ul>
+    </div>
+
+    <div class="gen-image-wrap">
+      <div class="gen-image-header">AI 试穿效果图</div>
+      <div class="gen-image-body" id="genImageBody">
+        <div class="gen-loading" id="genLoading">
+          <div class="spinner"></div>
+          <p>正在为你的毛孩子生成试穿效果图…</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-confirm secondary" onclick="resetAll()">重新上传</button>
+      <button class="btn-confirm primary" onclick="confirmOrder()">✓ 确认版型，去下单</button>
+    </div>
+  </div>
+
+  <div class="footer">© 2025 雨季定制工坊 · 每一件都是独家版型</div>
+</div>
+
+<script>
+// ─── Rain ──────────────────────────────────────────────────────────────────
+(function() {
+  const bg = document.getElementById('rainBg');
+  for (let i = 0; i < 40; i++) {
+    const d = document.createElement('div');
+    d.className = 'raindrop';
+    d.style.cssText = `left:${Math.random()*100}%;height:${Math.random()*60+40}px;animation-duration:${Math.random()*1.5+0.8}s;animation-delay:${Math.random()*2}s;`;
+    bg.appendChild(d);
+  }
+})();
+
+// ─── Upload ────────────────────────────────────────────────────────────────
+const uploadZone  = document.getElementById('uploadZone');
+const fileInput   = document.getElementById('fileInput');
+const previewWrap = document.getElementById('previewWrap');
+const previewImg  = document.getElementById('previewImg');
+const analyzeBtn  = document.getElementById('analyzeBtn');
+let uploadedFile = null, uploadedBase64 = null;
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover',  e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault(); uploadZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) handleFile(f);
+});
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+function handleFile(file) {
+  uploadedFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    uploadedBase64 = e.target.result.split(',')[1];
+    previewImg.src = e.target.result;
+    uploadZone.style.display = 'none';
+    previewWrap.style.display = 'block';
+    analyzeBtn.disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetUpload() {
+  uploadedFile = null; uploadedBase64 = null;
+  previewWrap.style.display = 'none';
+  uploadZone.style.display = 'block';
+  fileInput.value = ''; analyzeBtn.disabled = true;
+}
+function resetAll() {
+  resetUpload();
+  document.getElementById('resultPanel').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── Loading ───────────────────────────────────────────────────────────────
+const steps = [
+  { text: 'AI 正在观察你的毛孩子…',   sub: '识别品种、体型与毛色' },
+  { text: '分析体型，计算定制版型…',  sub: '参考标准码 + 个体修正值' },
+  { text: '生成专属聊天建议…',        sub: '好的设计师懂你的毛孩子' },
+];
+let stepTimer = null;
+
+function startLoading() {
+  document.getElementById('loadingOverlay').classList.add('show');
+  let i = 0;
+  (function tick() {
+    if (i < steps.length) {
+      document.getElementById('loadingText').textContent    = steps[i].text;
+      document.getElementById('loadingSubtext').textContent = steps[i].sub;
+      for (let j=0;j<3;j++) document.getElementById(`dot${j}`).classList.toggle('active', j===i);
+      i++; stepTimer = setTimeout(tick, 2200);
+    }
+  })();
+}
+function stopLoading() {
+  clearTimeout(stepTimer);
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
+
+// ─── Typewriter ────────────────────────────────────────────────────────────
+function typewrite(el, text, speed=28) {
+  return new Promise(resolve => {
+    let i = 0;
+    const cursor = document.getElementById('cursor');
+    (function tick() {
+      if (i <= text.length) { el.textContent = text.slice(0,i++); setTimeout(tick, speed); }
+      else { if (cursor) cursor.style.display='none'; resolve(); }
+    })();
+  });
+}
+
+// ─── System prompt ─────────────────────────────────────────────────────────
+const SYSTEM = `你是一位专业的宠物服装定制设计师，专门为法国斗牛犬和柯基犬设计雨季冲锋衣。
+
+【步骤A·视觉识别】仔细观察照片，识别：品种、毛色、体型胖瘦、显著体型特征。
+
+【步骤B·情感对话+定制建议】以亲切专业的语气对主人说一段建议：先夸狗（1句，具体可爱）、点出体型特点（1-2句）、给出具体尺码调整（用数字）、最后问"你觉得可以吗？"
+
+【严格按如下JSON输出，不要有任何多余文字】：
+{
+  "breed": "品种名",
+  "color": "毛色",
+  "body": "体型（4字内）",
+  "feature": "显著特征（10字内）",
+  "chat": "对话文字（80-120字）",
+  "specs": [
+    {"part": "脖围", "base": "标准L码", "adjust": "+3cm", "reason": "脖子粗短"},
+    {"part": "胸围", "base": "标准L码", "adjust": "+2cm", "reason": "胸宽"},
+    {"part": "背长", "base": "标准L码", "adjust": "-1.5cm", "reason": "避免如厕弄脏"}
+  ],
+  "imagePrompt": "一只[品种]，[毛色]，穿着定制雨季冲锋衣（海军蓝配黄色反光条，防水面料，连帽设计，侧面视角），衣服合身贴体，背景雨天城市街道，写实风格，高质量宠物摄影"
+}`;
+
+// ─── Call backend proxy ────────────────────────────────────────────────────
+async function callClaude(body) {
+  const res = await fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  return res.json();
+}
+
+// ─── Main analyze ──────────────────────────────────────────────────────────
+async function analyze() {
+  if (!uploadedBase64) return;
+  analyzeBtn.disabled = true;
+  startLoading();
+
+  try {
+    const data = await callClaude({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: SYSTEM,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: uploadedFile.type || 'image/jpeg', data: uploadedBase64 } },
+          { type: 'text', text: '请分析这只狗狗的照片，按要求返回JSON。' }
+        ]
+      }]
+    });
+
+    const raw = data.content?.[0]?.text || '';
+    let parsed;
+    try {
+      parsed = JSON.parse((raw.match(/\{[\s\S]*\}/) || [raw])[0]);
+    } catch {
+      parsed = {
+        breed:'法国斗牛犬', color:'奶白色', body:'壮实型', feature:'脖子粗短、胸部宽',
+        chat:'看照片你家法斗是个壮小伙，脖子肉肉的，胸膛也挺宽。市面上的L码肯定卡它脖子。我建议在基础版型上，把脖围放宽3厘米，胸围放宽2厘米，后背缩短1.5厘米，这样它上厕所就不会弄脏衣服。你觉得可以吗？',
+        specs:[
+          {part:'脖围',base:'标准L码',adjust:'+3cm',reason:'脖子粗短'},
+          {part:'胸围',base:'标准L码',adjust:'+2cm',reason:'胸部宽阔'},
+          {part:'背长',base:'标准L码',adjust:'-1.5cm',reason:'避免如厕弄脏'}
+        ],
+        imagePrompt:'一只法国斗牛犬，奶白色，穿着定制雨季冲锋衣（海军蓝配黄色反光条，防水面料，连帽设计，侧面视角），衣服合身贴体，背景雨天城市街道，写实风格'
+      };
+    }
+
+    stopLoading();
+
+    // Show result panel
+    const panel = document.getElementById('resultPanel');
+    panel.style.display = 'block';
+    window.scrollTo({ top: panel.offsetTop - 20, behavior: 'smooth' });
+
+    // Tags
+    document.getElementById('dogTags').innerHTML = [
+      `<span class="tag">${parsed.breed}</span>`,
+      `<span class="tag moss">${parsed.color}</span>`,
+      `<span class="tag">${parsed.body}</span>`,
+      `<span class="tag">${parsed.feature}</span>`
+    ].join('');
+
+    // Chat typewriter
+    document.getElementById('cursor').style.display = 'inline-block';
+    await typewrite(document.getElementById('chatText'), parsed.chat || '');
+
+    // Specs
+    document.getElementById('specList').innerHTML = (parsed.specs||[]).map(s => `
+      <li class="spec-item">
+        <span class="spec-label">${s.part}</span>
+        <div class="spec-change">
+          <span class="spec-base">${s.base}</span>
+          <span class="spec-new">定制调整</span>
+          <span class="spec-diff">${s.adjust}</span>
+        </div>
+      </li>`).join('');
+
+    // Generate image description
+    generateImageDesc(parsed);
+
+  } catch (err) {
+    stopLoading();
+    console.error(err);
+    alert('分析失败，请稍后重试。');
+    analyzeBtn.disabled = false;
+  }
+}
+
+// ─── Image description ─────────────────────────────────────────────────────
+async function generateImageDesc(parsed) {
+  const genBody = document.getElementById('genImageBody');
+  const genLoading = document.getElementById('genLoading');
+
+  // 更新 loading 文字
+  genLoading.querySelector('p').textContent = '正在生成试穿效果图，约需15秒…';
+
+  try {
+    // 构建图像生成 prompt（中文）
+    const imagePrompt = parsed.imagePrompt ||
+      `一只${parsed.breed}，${parsed.color}毛色，体型${parsed.body}，穿着定制雨季冲锋衣（海军蓝配黄色反光条，防水面料，连帽设计），衣服合身贴体，侧面全身视角，背景是雨天城市街道，写实风格，高质量宠物摄影`;
+
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'image', prompt: imagePrompt })
+    });
+
+    const data = await res.json();
+
+    if (data.imageUrl) {
+      genLoading.style.display = 'none';
+      genBody.innerHTML = `
+        <img src="${data.imageUrl}" alt="AI试穿效果图"
+          style="width:100%;border-radius:12px;display:block;"
+          onerror="this.parentNode.innerHTML='<p style=color:#bbb;font-size:13px;padding:20px;text-align:center>图片加载失败，请重试</p>'"
+        >
+        <p style="font-size:12px;color:#bbb;text-align:center;margin-top:10px;padding-bottom:4px;">
+          由智谱 CogView 生成 · 仅供效果参考
+        </p>`;
+    } else {
+      throw new Error(data.error || '生成失败');
+    }
+  } catch (err) {
+    genLoading.style.display = 'none';
+    genBody.innerHTML = `<p style="color:#bbb;font-size:13px;padding:20px;text-align:center;">效果图生成失败：${err.message}</p>`;
+  }
+}
+
+// ─── Confirm ───────────────────────────────────────────────────────────────
+function confirmOrder() {
+  const btn = event.target;
+  btn.textContent = '🎉 已记录版型！设计师将联系你';
+  btn.style.background = 'linear-gradient(135deg,#4a6e32,#7BA05B)';
+  btn.disabled = true;
+}
+</script>
+</body>
+</html>
